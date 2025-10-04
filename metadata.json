@@ -1,0 +1,5 @@
+{
+  "name": "3D Stacked RISC-V Accelerator Simulator",
+  "description": "An academic-grade, interactive web simulator for analyzing performance, power, and thermal characteristics of 3D-stacked RISC-V systems for research and publication.",
+  "requestFramePermissions": []
+}

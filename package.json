@@ -1,0 +1,16 @@
+{
+  "name": "3d-sim-backend",
+  "version": "1.0.0",
+  "description": "Backend server for handling OTP authentication for the 3D Stacked RISC-V Simulator.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "instructions": "To run the backend, open your terminal in the project directory and run 'npm install', followed by 'npm start'. The server will run on http://localhost:3001."
+}

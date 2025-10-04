@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IEEE-Ready: 3D RISC-V Simulator</title>
+    <meta name="description" content="An academic-grade, interactive web simulator for analyzing performance, power, and thermal characteristics of 3D-stacked RISC-V systems for research and publication." />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "@google/generative-ai": "https://aistudiocdn.com/@google/generative-ai@^0.24.1"
+  }
+}
+</script>
+<script>
+  // Set up Tailwind CSS for dark mode class strategy and custom font
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  @keyframes move-2d-stream {
+    from { transform: translateX(0); }
+    to { transform: translateX(120px); }
+  }
+
+  @keyframes move-3d-stream {
+    from { transform: translateY(0); }
+    to { transform: translateY(20px); }
+  }
+</style>
+</head>
+  <body class="bg-slate-100 dark:bg-slate-950 font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
