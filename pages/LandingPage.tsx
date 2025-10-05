@@ -67,30 +67,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowLogin }) => {
                     </div>
                 </div>
 
-                 {/* Publication-Ready Section */}
-                <div className="bg-slate-100 dark:bg-slate-900/50 py-24 sm:py-32 rounded-2xl">
-                    <div className="mx-auto max-w-5xl px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl lg:text-center">
-                            <h2 className="text-base font-semibold leading-7 text-cyan-600 dark:text-cyan-400">Publication-Ready</h2>
-                            <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                                From Simulation to Publication
-                            </p>
-                            <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                                This tool is designed with academic rigor in mind. All underlying simulation models are formally documented, and results can be exported for reproduction and further analysis.
-                            </p>
-                        </div>
-                        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-                             <div className="flex items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                                <ArrowDownTrayIcon className="w-8 h-8 text-cyan-500 mr-4"/>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 dark:text-slate-100">Export Raw Data</h3>
-                                    <p className="text-slate-600 dark:text-slate-300 text-sm">Download your complete configuration and results in JSON format for use in other tools and to include with your paper.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     );

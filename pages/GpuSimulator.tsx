@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { GoogleGenAI } from '@google/genai';
 import { GpuConfig, GpuBenchmarkResult } from '../types';
-import { PlayIcon, Squares2X2Icon, ArrowUturnLeftIcon, InformationCircleIcon, XMarkIcon } from '../components/icons';
+import { PlayIcon, Squares2X2Icon, ArrowUturnLeftIcon, InformationCircleIcon, XMarkIcon, LightBulbIcon, ExclamationTriangleIcon } from '../components/icons';
 import GpuVisualizer from '../components/GpuVisualizer';
 
 interface GpuSimulatorProps {
@@ -12,7 +13,6 @@ interface GpuSimulatorProps {
 }
 
 type GpuBenchmark = string; // Now a string to accommodate custom key
-type MemoryAccessPattern = 'sequential' | 'strided' | 'random';
 
 interface GpuBenchmarkInfo {
     name: string;
@@ -100,8 +100,11 @@ const ParameterInput: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   step?: number;
   tooltip?: string;
-  isCustom?: boolean;
-}> = ({ label, unit, value, onChange, step = 1, tooltip, isCustom = false }) => (
+  disabled?: boolean;
+  customStyle?: boolean;
+  min?: number;
+  max?: number;
+}> = ({ label, unit, value, onChange, step = 1, tooltip, disabled = false, customStyle = false, min, max }) => (
     <div>
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
             <span className="flex items-center space-x-1">
@@ -121,16 +124,69 @@ const ParameterInput: React.FC<{
                 type="number"
                 value={value}
                 onChange={onChange}
-                className={`block w-full rounded-none rounded-l-md ${isCustom ? "bg-purple-50 dark:bg-purple-900/20" : "bg-white dark:bg-slate-800/70"} text-slate-900 dark:text-slate-200 sm:text-sm focus:ring-purple-500 focus:border-purple-500 border border-slate-300 dark:border-slate-600 transition-colors`}
+                className={`block w-full rounded-none rounded-l-md ${customStyle ? "bg-purple-50 dark:bg-purple-900/20" : "bg-white dark:bg-slate-800/70"} text-slate-900 dark:text-slate-200 sm:text-sm focus:ring-purple-500 focus:border-purple-500 border border-slate-300 dark:border-slate-600 transition-colors disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:cursor-not-allowed`}
                 step={step}
-                min="0"
-                disabled={!isCustom}
+                min={min === undefined ? 0 : min}
+                max={max}
+                disabled={disabled}
             />
             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs">
                 {unit}
             </span>
         </div>
     </div>
+);
+
+const SliderParameterInput: React.FC<{
+  label: string;
+  unit: string;
+  value: number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  min: number;
+  max: number;
+  step?: number;
+  tooltip?: string;
+}> = ({ label, unit, value, onChange, min, max, step = 1, tooltip }) => (
+  <div className="col-span-2">
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <span className="flex items-center space-x-1">
+            <span>{label}</span>
+            {tooltip && (
+                <div className="relative group">
+                    <InformationCircleIcon className="w-4 h-4 text-slate-400" />
+                    <div className="absolute bottom-full mb-2 w-60 p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 -translate-x-1/2 left-1/2">
+                        {tooltip}
+                    </div>
+                </div>
+            )}
+        </span>
+    </label>
+    <div className="mt-1 flex items-center space-x-2">
+        <input
+            type="range"
+            value={value}
+            onChange={onChange}
+            min={min}
+            max={max}
+            step={step}
+            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+        />
+        <div className="flex rounded-md shadow-sm w-32">
+            <input
+                type="number"
+                value={value}
+                onChange={onChange}
+                min={min}
+                max={max}
+                step={step}
+                className="block w-full rounded-none rounded-l-md bg-white dark:bg-slate-800/70 text-slate-900 dark:text-slate-200 sm:text-sm focus:ring-purple-500 focus:border-purple-500 border border-slate-300 dark:border-slate-600 transition-colors"
+            />
+            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs">
+                {unit}
+            </span>
+        </div>
+    </div>
+  </div>
 );
 
 
@@ -168,6 +224,42 @@ const BenchmarkInfoModal: React.FC<{
     );
 };
 
+const LoadingSpinner: React.FC = () => (
+    <svg className="animate-spin h-4 w-4 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+);
+
+const AiSuggestion: React.FC<{
+    isLoading: boolean;
+    error: string | null;
+    suggestion: string | null;
+}> = ({ isLoading, error, suggestion }) => {
+    if (!isLoading && !error && !suggestion) return null;
+
+    let content;
+    if (isLoading) {
+        content = <div className="flex items-center space-x-2"><LoadingSpinner /><p>Analyzing cache performance...</p></div>;
+    } else if (error) {
+        content = <p>{error}</p>;
+    } else {
+        content = <p>{suggestion}</p>;
+    }
+
+    return (
+        <div className={`mt-4 p-3 rounded-lg flex items-start space-x-3 text-xs ${error ? 'bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-cyan-50 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200'}`}>
+            <div className={`flex-shrink-0 mt-0.5 ${error ? 'text-red-500' : 'text-cyan-500'}`}>
+                {error ? <ExclamationTriangleIcon className="w-4 h-4" /> : <LightBulbIcon className="w-4 h-4" />}
+            </div>
+            <div>
+                <h5 className={`font-bold mb-1 ${error ? 'text-red-800 dark:text-red-200' : 'text-cyan-900 dark:text-cyan-100'}`}>{error ? 'Analysis Error' : 'AI Cache Suggestion'}</h5>
+                {content}
+            </div>
+        </div>
+    );
+};
+
 
 const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, defaultGpuConfig, onSimulationComplete, theme }) => {
     const [selectedBenchmarkKey, setSelectedBenchmarkKey] = useState<GpuBenchmark>('ml:gemm_large');
@@ -182,8 +274,14 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
         isThrottling: false,
     });
     const [customBenchmark, setCustomBenchmark] = useState<GpuBenchmarkInfo>(GPU_BENCHMARKS['custom']);
-    const [memoryPattern, setMemoryPattern] = useState<MemoryAccessPattern>('strided');
+    const [memoryPattern, setMemoryPattern] = useState<number>(1); // 0: sequential, 1: strided, 2: random
     
+    // AI Suggestion State
+    const [aiCacheSuggestion, setAiCacheSuggestion] = useState<string | null>(null);
+    const [isSuggestionLoading, setIsSuggestionLoading] = useState<boolean>(false);
+    const [suggestionError, setSuggestionError] = useState<string | null>('');
+    const suggestionTimeoutRef = useRef<number | null>(null);
+
     const simIntervalRef = useRef<number | null>(null);
     
     const visualizedCores = Math.min(gpuConfig.cores, 256);
@@ -200,15 +298,69 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
 
     useEffect(() => {
         return () => {
-            if (simIntervalRef.current) {
-                clearInterval(simIntervalRef.current);
-            }
+            if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+            if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current);
         };
     }, []);
 
+    // Effect for AI Cache Suggestions
+    useEffect(() => {
+        if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current);
+
+        const getAiCacheSuggestion = async () => {
+            setIsSuggestionLoading(true);
+            setSuggestionError(null);
+            setAiCacheSuggestion(null);
+
+            const benchmark = GPU_BENCHMARKS[selectedBenchmarkKey];
+            if (!benchmark || selectedBenchmarkKey === 'custom') {
+                setIsSuggestionLoading(false);
+                return;
+            }
+
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+                const localityDescription = benchmark.localityFactor > 0.8 ? 'High' : benchmark.localityFactor > 0.5 ? 'Medium' : 'Low';
+                const prompt = `
+                    You are a senior GPU architect. Analyze the following workload and L2 cache configuration.
+
+                    Workload: "${benchmark.name}"
+                    Characteristics:
+                    - Expected Cache Locality: ${localityDescription} (${benchmark.localityFactor.toFixed(2)}). This factor directly models the expected L2 hit rate.
+                    - Access Pattern: ${benchmark.description.accessPattern}.
+
+                    Current L2 Cache Configuration:
+                    - Size: ${gpuConfig.l2CacheSize} KB
+                    - Associativity: ${gpuConfig.l2CacheAssociativity}-way
+
+                    Task:
+                    Provide a concise, one-paragraph recommendation.
+                    - If the locality is 'Low' and the cache size is small (e.g., under 8192 KB), recommend increasing the cache size to better capture the irregular access patterns.
+                    - If the locality is 'Medium' but associativity is low (e.g., under 16), recommend increasing associativity to reduce conflict misses.
+                    - If the configuration appears well-suited for the workload (e.g., high locality), state that the current setup is efficient.
+                    - Explain the rationale for your suggestion in simple terms (e.g., "to reduce conflict misses", "to better capture the working set").
+                    - Do not add any introductory or concluding phrases. Just provide the direct recommendation.
+                `;
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: prompt,
+                });
+                setAiCacheSuggestion(response.text);
+            } catch (e: any) {
+                console.error("AI Suggestion Error:", e);
+                setSuggestionError("Could not get AI suggestion. Check API key.");
+            } finally {
+                setIsSuggestionLoading(false);
+            }
+        };
+
+        suggestionTimeoutRef.current = window.setTimeout(getAiCacheSuggestion, 500); // Debounce
+    }, [selectedBenchmarkKey, gpuConfig.l2CacheSize, gpuConfig.l2CacheAssociativity]);
+
+
     const handleConfigChange = (field: keyof GpuConfig, value: string) => {
         const numericValue = parseFloat(value);
-        if (isNaN(numericValue) || numericValue < 0) return;
+        if (isNaN(numericValue) || (field !== 'computationalIntensity' && numericValue < 0)) return;
         setGpuConfig(prev => ({...prev, [field]: numericValue }));
     };
 
@@ -240,14 +392,14 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
         const benchmark = selectedBenchmarkKey === 'custom' ? customBenchmark : GPU_BENCHMARKS[selectedBenchmarkKey];
         
         // --- Refined Simulation Physics & Performance ---
-        const totalFlops = benchmark.opsPerItem * benchmark.totalItems;
+        const totalFlops = benchmark.opsPerItem * benchmark.totalItems * gpuConfig.computationalIntensity;
         const totalDataBytes = benchmark.dataPerItem * benchmark.totalItems;
 
         // --- Calculate effective locality based on memory access pattern ---
         let effectiveLocalityFactor = benchmark.localityFactor;
-        if (memoryPattern === 'sequential') {
+        if (memoryPattern === 0) { // Sequential
             effectiveLocalityFactor = Math.min(0.995, benchmark.localityFactor * 1.2);
-        } else if (memoryPattern === 'random') {
+        } else if (memoryPattern === 2) { // Random
             effectiveLocalityFactor = benchmark.localityFactor * 0.4;
         }
 
@@ -366,6 +518,8 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
                 const maxPossibleFlops = gpuConfig.cores * finalAvgClock * 1e9 * (kernelExecutionTimeMs / 1000) * 2; // Assuming 2 FLOPS/cycle (FMA)
                 const averageCoreUtilization = maxPossibleFlops > 0 ? Math.min(1, (totalFlops / maxPossibleFlops)) : 0; // Cap at 100%
 
+                const memoryAccessPatternString = memoryPattern === 0 ? 'sequential' : memoryPattern === 2 ? 'random' : 'strided';
+
                 const result: GpuBenchmarkResult = {
                     benchmarkName: benchmark.name,
                     config: gpuConfig,
@@ -382,7 +536,7 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
                     estimatedPowerW,
                     averageCoreUtilization,
                     thermalData: coreTemperatures,
-                    memoryAccessPattern: memoryPattern
+                    memoryAccessPattern: memoryAccessPatternString
                 };
 
                 onSimulationComplete(result);
@@ -408,37 +562,59 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
                     <div className="bg-purple-500/10 p-2 rounded-md"><Squares2X2Icon className="w-6 h-6 text-purple-500" /></div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Benchmark Selection</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-end">
-                    <div>
-                        <label htmlFor="benchmark-select" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                            Load a benchmark workload
-                        </label>
-                        <select
-                            id="benchmark-select"
-                            value={selectedBenchmarkKey}
-                            onChange={e => setSelectedBenchmarkKey(e.target.value as GpuBenchmark)}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-slate-800/70 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md text-slate-900 dark:text-slate-200"
-                        >
-                           {Object.entries(benchmarkCategories).map(([categoryName, benchmarks]) => (
-                                <optgroup key={categoryName} label={categoryName.toUpperCase()}>
-                                    {Object.entries(benchmarks).map(([key, { name }]) => (
-                                        <option key={key} value={key}>{name}</option>
-                                    ))}
-                                </optgroup>
-                           ))}
-                        </select>
-                    </div>
+                <div className="grid grid-cols-1 gap-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                            Memory Access Pattern
+                            Load a benchmark workload
                         </label>
-                         <div className="mt-1 grid grid-cols-3 gap-1 rounded-lg bg-slate-200 dark:bg-slate-900/50 p-1">
-                            {(['sequential', 'strided', 'random'] as MemoryAccessPattern[]).map(pattern => (
-                                <button key={pattern} onClick={() => setMemoryPattern(pattern)} className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 capitalize ${memoryPattern === pattern ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'}`}>
-                                    {pattern}
-                                </button>
+                        <div className="mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-800/70 border border-slate-300 dark:border-slate-600 rounded-md p-2 space-y-2">
+                            {Object.entries(benchmarkCategories).map(([categoryName, benchmarks]) => (
+                                <div key={categoryName}>
+                                    <h5 className="px-2 py-1 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{categoryName}</h5>
+                                    <div className="space-y-1">
+                                        {Object.entries(benchmarks).map(([key, benchmarkInfo]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => setSelectedBenchmarkKey(key)}
+                                                className={`w-full text-left flex justify-between items-center px-3 py-2 text-sm rounded-md transition-colors duration-150 ${
+                                                    selectedBenchmarkKey === key
+                                                        ? 'bg-purple-600 text-white font-semibold'
+                                                        : 'text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                                }`}
+                                            >
+                                                <span>{benchmarkInfo.name}</span>
+                                                <div className="relative group flex items-center ml-2">
+                                                    <InformationCircleIcon className={`w-5 h-5 flex-shrink-0 ${selectedBenchmarkKey === key ? 'text-white/70' : 'text-slate-400'}`} />
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                                        <h6 className="font-bold text-sm mb-1 text-purple-300">{benchmarkInfo.name}</h6>
+                                                        <p className="mt-2"><strong className="font-semibold text-slate-300">Computational Intensity:</strong> {benchmarkInfo.description.intensity}</p>
+                                                        <p className="mt-1"><strong className="font-semibold text-slate-300">Access Pattern:</strong> {benchmarkInfo.description.accessPattern}</p>
+                                                        <p className="mt-1"><strong className="font-semibold text-slate-300">Typical Applications:</strong> {benchmarkInfo.description.applications}</p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
+                    </div>
+                    <div>
+                        <ParameterInput 
+                            label="Memory Access Pattern" 
+                            unit="Value" 
+                            value={memoryPattern} 
+                            onChange={e => {
+                                const val = parseInt(e.target.value, 10);
+                                if (!isNaN(val) && val >= 0 && val <= 2) {
+                                    setMemoryPattern(val);
+                                }
+                            }}
+                            min={0}
+                            max={2}
+                            step={1}
+                            tooltip="Sets the memory access behavior. 0: Sequential, 1: Strided, 2: Random."
+                        />
                     </div>
                 </div>
                 {selectedBenchmarkKey === 'custom' && (
@@ -448,10 +624,10 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
                             Model a unique workload by defining its core characteristics below. This allows you to simulate the performance of specialized algorithms or applications not covered by the standard benchmarks.
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <ParameterInput isCustom label="Ops per Item" unit="" value={customBenchmark.opsPerItem} onChange={e => handleCustomBenchmarkChange('opsPerItem', e.target.value)} tooltip="Total operations (e.g., FLOPs) performed for each work item."/>
-                            <ParameterInput isCustom label="Data per Item" unit="Bytes" value={customBenchmark.dataPerItem} onChange={e => handleCustomBenchmarkChange('dataPerItem', e.target.value)} tooltip="Bytes of data read/written per work item. Higher value means more memory intensive."/>
-                            <ParameterInput isCustom label="Total Items" unit="" value={customBenchmark.totalItems} onChange={e => handleCustomBenchmarkChange('totalItems', e.target.value)} tooltip="Total number of work items to process."/>
-                            <ParameterInput isCustom label="Locality Factor" unit="0-1" value={customBenchmark.localityFactor} onChange={e => handleCustomBenchmarkChange('localityFactor', e.target.value)} step={0.01} tooltip="Represents L2 cache hit rate. 1.0 is 100% hits (high locality), 0.0 is 0% hits (random access)."/>
+                            <ParameterInput customStyle disabled={selectedBenchmarkKey !== 'custom'} label="Ops per Item" unit="" value={customBenchmark.opsPerItem} onChange={e => handleCustomBenchmarkChange('opsPerItem', e.target.value)} tooltip="Total operations (e.g., FLOPs) performed for each work item."/>
+                            <ParameterInput customStyle disabled={selectedBenchmarkKey !== 'custom'} label="Data per Item" unit="Bytes" value={customBenchmark.dataPerItem} onChange={e => handleCustomBenchmarkChange('dataPerItem', e.target.value)} tooltip="Bytes of data read/written per work item. Higher value means more memory intensive."/>
+                            <ParameterInput customStyle disabled={selectedBenchmarkKey !== 'custom'} label="Total Items" unit="" value={customBenchmark.totalItems} onChange={e => handleCustomBenchmarkChange('totalItems', e.target.value)} tooltip="Total number of work items to process."/>
+                            <ParameterInput customStyle disabled={selectedBenchmarkKey !== 'custom'} label="Locality Factor" unit="0-1" value={customBenchmark.localityFactor} onChange={e => handleCustomBenchmarkChange('localityFactor', e.target.value)} step={0.01} tooltip="Represents L2 cache hit rate. 1.0 is 100% hits (high locality), 0.0 is 0% hits (random access)."/>
                         </div>
                     </div>
                 )}
@@ -478,6 +654,24 @@ const GpuSimulator: React.FC<GpuSimulatorProps> = ({ gpuConfig, setGpuConfig, de
                                 <ParameterInput label="Base Clock Speed" unit="GHz" value={gpuConfig.clockSpeed} onChange={e => handleConfigChange('clockSpeed', e.target.value)} step={0.1} />
                                 <ParameterInput label="Mem Bandwidth" unit="GB/s" value={gpuConfig.memoryBandwidth} onChange={e => handleConfigChange('memoryBandwidth', e.target.value)} />
                                 <ParameterInput label="L2 Cache Size" unit="KB" value={gpuConfig.l2CacheSize} onChange={e => handleConfigChange('l2CacheSize', e.target.value)} />
+                                <ParameterInput label="L2 Cache Associativity" unit="Ways" value={gpuConfig.l2CacheAssociativity} onChange={e => handleConfigChange('l2CacheAssociativity', e.target.value)} />
+                                <div className="col-span-2">
+                                    <AiSuggestion 
+                                        isLoading={isSuggestionLoading}
+                                        error={suggestionError}
+                                        suggestion={aiCacheSuggestion}
+                                    />
+                                </div>
+                                <SliderParameterInput 
+                                    label="Computational Intensity"
+                                    unit="x Ratio"
+                                    value={gpuConfig.computationalIntensity}
+                                    onChange={e => handleConfigChange('computationalIntensity', e.target.value)}
+                                    min={0.1}
+                                    max={5}
+                                    step={0.1}
+                                    tooltip="Adjusts compute vs. memory ops. >1 is more compute, <1 is more memory."
+                                />
                             </div>
                         </details>
                         <details open className="space-y-3 pt-2">

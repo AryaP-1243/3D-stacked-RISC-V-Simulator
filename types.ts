@@ -106,6 +106,7 @@ export interface GpuConfig {
     l2CacheSize: number; // in KB
     l2CacheLatency: number; // in cycles
     l2CacheAssociativity: number; // ways
+    computationalIntensity: number; // Multiplier for ops/item
     maxPowerDraw: number; // in Watts
     junctionToCaseResistance: number; // °C/W
     caseToAmbientResistance: number; // °C/W

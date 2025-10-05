@@ -1,6 +1,6 @@
 import React from 'react';
 import { Page } from '../types';
-import { LayoutDashboardIcon, WrenchScrewdriverIcon, BeakerIcon, ChartBarIcon, SparklesIcon, Squares2X2Icon, ShieldCheckIcon } from './icons';
+import { LayoutDashboardIcon, WrenchScrewdriverIcon, BeakerIcon, ChartBarIcon, SparklesIcon, Squares2X2Icon, ShieldCheckIcon, DocumentTextIcon } from './icons';
 
 interface HeaderProps {
     activePage: Page;

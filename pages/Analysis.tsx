@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Type } from '@google/genai';
 import { BenchmarkResult, RegisterFile, GpuBenchmarkResult, BenchmarkMetrics, SystemConfig, HardwareValidationResult } from '../types';
@@ -284,6 +285,10 @@ const Analysis: React.FC<AnalysisProps> = ({ benchmarkResult: initialResult, reg
     
     const powerImprovement = benchmarkResult ? ((benchmarkResult['2D Baseline'].power.total - benchmarkResult['3D Stacked'].power.total) / benchmarkResult['2D Baseline'].power.total) * 100 : 0;
     const tempDiff = benchmarkResult ? benchmarkResult['3D Stacked'].operatingTemp - benchmarkResult['2D Baseline'].operatingTemp : 0;
+    
+    const power2D = benchmarkResult ? benchmarkResult['2D Baseline'].power : null;
+    const power3D = benchmarkResult ? benchmarkResult['3D Stacked'].power : null;
+    const maxPower = benchmarkResult && power2D && power3D ? Math.max(power2D.dynamic, power2D.static, power3D.dynamic, power3D.static, 0.001) : 0.001;
 
     return (
         <div className="space-y-8">
@@ -358,17 +363,44 @@ const Analysis: React.FC<AnalysisProps> = ({ benchmarkResult: initialResult, reg
                             </div>
                             <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <div className="flex items-center space-x-3 mb-6"><div className="bg-sky-500/10 p-2 rounded-md"><LightBulbIcon className="w-6 h-6 text-sky-500" /></div><h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">CPU Power Analysis</h3></div>
-                                <div className="space-y-4">
-                                    {( [['2D Baseline', benchmarkResult['2D Baseline'].power], ['3D Stacked', benchmarkResult['3D Stacked'].power]] as const).map(([name, power]) => (
-                                        <div key={name}>
-                                            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">{name}: {power.total.toFixed(3)} W</h4>
-                                            <div className="flex h-6 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden text-xs text-white font-bold text-center">
-                                                <div className="bg-sky-500 flex items-center justify-center" style={{ width: `${(power.dynamic / power.total) * 100}%` }} title={`Dynamic: ${power.dynamic.toFixed(3)}W`}>Dyn</div>
-                                                <div className="bg-amber-500 flex items-center justify-center" style={{ width: `${(power.static / power.total) * 100}%` }} title={`Static: ${power.static.toFixed(3)}W`}>Static</div>
+                                {power2D && power3D && (
+                                    <div className="space-y-6">
+                                        {( [['2D Baseline', power2D], ['3D Stacked', power3D]] as const).map(([name, power]) => (
+                                            <div key={name}>
+                                                <div className="flex justify-between items-baseline mb-2">
+                                                    <h4 className="font-semibold text-slate-800 dark:text-slate-200">{name}</h4>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">Total: <span className="font-bold text-base text-slate-700 dark:text-slate-200">{power.total.toFixed(3)} W</span></p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {/* Dynamic Power Bar */}
+                                                    <div className="flex items-center group">
+                                                        <span className="w-20 shrink-0 text-sm text-slate-600 dark:text-slate-300">Dynamic</span>
+                                                        <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-5 relative">
+                                                            <div 
+                                                                className="bg-sky-500 h-5 rounded-full transition-all duration-500"
+                                                                style={{ width: `${(power.dynamic / maxPower) * 100}%` }}
+                                                            >
+                                                            </div>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{power.dynamic.toFixed(3)} W</span>
+                                                        </div>
+                                                    </div>
+                                                    {/* Static Power Bar */}
+                                                    <div className="flex items-center group">
+                                                        <span className="w-20 shrink-0 text-sm text-slate-600 dark:text-slate-300">Static</span>
+                                                        <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-5 relative">
+                                                            <div 
+                                                                className="bg-amber-500 h-5 rounded-full transition-all duration-500"
+                                                                style={{ width: `${(power.static / maxPower) * 100}%` }}
+                                                            >
+                                                            </div>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{power.static.toFixed(3)} W</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <CacheAnalysisVisualizer benchmarkResult={benchmarkResult} config2D={config2D} config3D={config3D} />

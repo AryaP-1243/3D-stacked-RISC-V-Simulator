@@ -4,7 +4,7 @@ import {
     CpuChipIcon, LayoutDashboardIcon, WrenchScrewdriverIcon, BeakerIcon, ChartBarIcon, 
     SparklesIcon, SunIcon, MoonIcon, ArrowRightOnRectangleIcon, 
     ChevronDoubleLeftIcon, ChevronDoubleRightIcon, Squares2X2Icon,
-    ShieldCheckIcon
+    ShieldCheckIcon, DocumentTextIcon
 } from './icons';
 
 interface SidebarProps {

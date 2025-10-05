@@ -61,6 +61,7 @@ const GpuAnalysis: React.FC<GpuAnalysisProps> = ({ result, theme }) => {
                     <p className="text-sm text-slate-600 dark:text-slate-300">
                         Benchmark: <span className="font-semibold">{benchmarkName}</span>
                         {memoryAccessPattern && <span className="capitalize text-slate-500"> ({memoryAccessPattern} Access)</span>}
+                        {config.computationalIntensity && <span className="text-slate-500"> (Intensity: x{config.computationalIntensity.toFixed(1)})</span>}
                     </p>
                 </div>
             </div>

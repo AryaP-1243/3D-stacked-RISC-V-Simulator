@@ -42,6 +42,7 @@ const DEFAULT_GPU_CONFIG: GpuConfig = {
     l2CacheSize: 4096, // KB (4MB)
     l2CacheLatency: 20, // cycles
     l2CacheAssociativity: 16, // ways
+    computationalIntensity: 1.0, // Baseline ratio of compute to memory ops
     maxPowerDraw: 250, // Watts
     junctionToCaseResistance: 0.2, // °C/W
     caseToAmbientResistance: 0.15, // °C/W
