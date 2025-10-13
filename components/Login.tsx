@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CpuChipIcon } from './icons';
 
@@ -229,7 +228,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   const renderFormContent = () => {
-    const buttonClasses = "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-800 focus:ring-cyan-500 disabled:bg-slate-400 dark:disabled:bg-slate-600";
+    const buttonClasses = "w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-600 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-900 focus:ring-cyan-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:from-slate-400 disabled:to-slate-400 transition-all duration-300 hover:scale-[1.02]";
+    const inputClasses = "block w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent sm:text-sm text-slate-900 dark:text-white transition-colors";
     
     if (mode === 'otp') {
         if (loading && isServerOnline === null) {
@@ -256,7 +256,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 <input
                                     id="email-otp" name="email" type="email" autoComplete="email" required
                                     value={otpEmail} onChange={(e) => setOtpEmail(e.target.value)}
-                                    className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-slate-900 dark:text-white"
+                                    className={inputClasses}
                                 />
                             </div>
                         </div>
@@ -279,7 +279,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 <input
                                     id="otp-code" name="otp-code" type="text" maxLength={6} required
                                     value={userOtp} onChange={(e) => setUserOtp(e.target.value)}
-                                    className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-slate-900 dark:text-white"
+                                    className={inputClasses}
                                 />
                             </div>
                              <p className="mt-2 text-xs text-center text-slate-600 dark:text-slate-300">
@@ -320,7 +320,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <input
                 id="username" name="username" type="text" autoComplete="username" required
                 value={username} onChange={(e) => setUsername(e.target.value)}
-                className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-slate-900 dark:text-white"
+                className={inputClasses}
               />
             </div>
           </div>
@@ -332,7 +332,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <input
                 id="password" name="password" type="password" autoComplete={mode === 'register' ? "new-password" : "current-password"} required
                 value={password} onChange={(e) => setPassword(e.target.value)}
-                className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-slate-900 dark:text-white"
+                className={inputClasses}
               />
             </div>
           </div>
@@ -345,7 +345,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 <input
                     id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" required
                     value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-slate-900 dark:text-white"
+                    className={inputClasses}
                 />
                 </div>
             </div>
@@ -383,23 +383,23 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   const getTabClass = (tabMode: Mode) => {
-    return `px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+    return `px-4 py-2 text-sm font-medium rounded-md transition-colors w-full ${
         mode === tabMode 
-        ? 'bg-cyan-600 text-white' 
-        : 'text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+        ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' 
+        : 'text-slate-500 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'
     }`;
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900 p-4">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-cyan-500/10 p-3 rounded-lg inline-block">
+            <div className="bg-cyan-500/10 p-3 rounded-2xl inline-block ring-8 ring-white/10">
               <CpuChipIcon className="w-10 h-10 text-cyan-600 dark:text-cyan-400" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             3D Stacked RISC-V Simulator
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">

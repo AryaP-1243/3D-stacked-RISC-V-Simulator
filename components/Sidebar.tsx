@@ -34,7 +34,7 @@ const NavLink: React.FC<{
     onClick: () => void;
 }> = ({ item, isActive, isCollapsed, onClick }) => {
     const activeClasses = 'bg-cyan-500/10 text-cyan-500 dark:text-cyan-300';
-    const inactiveClasses = 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200';
+    const inactiveClasses = 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200';
     
     return (
         <li>
@@ -42,8 +42,8 @@ const NavLink: React.FC<{
                 onClick={onClick}
                 className={`flex items-center w-full h-12 px-4 rounded-lg transition-all duration-200 group relative ${isActive ? activeClasses : inactiveClasses}`}
             >
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-cyan-500 rounded-r-full"></div>}
-                <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>{item.icon}</div>
+                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-gradient-to-b from-cyan-400 to-sky-500 rounded-r-full shadow-[0_0_10px] shadow-cyan-500/50"></div>}
+                <div className={`transition-transform duration-200 ${isActive ? 'scale-110 text-cyan-500 dark:text-cyan-300' : ''}`}>{item.icon}</div>
                 <span className={`ml-4 font-semibold text-sm transition-opacity duration-200 whitespace-nowrap ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>{item.label}</span>
                 {isCollapsed && (
                     <span className="absolute left-full ml-4 w-max px-2 py-1 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
@@ -58,7 +58,7 @@ const NavLink: React.FC<{
 const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, theme, toggleTheme, isCollapsed, setIsCollapsed }) => {
 
     return (
-        <aside className={`fixed top-0 left-0 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}>
+        <aside className={`fixed top-0 left-0 h-full bg-white dark:bg-slate-900/95 dark:backdrop-blur-sm border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}>
             {/* Header */}
             <div className={`flex items-center h-16 border-b border-slate-200 dark:border-slate-800 px-4 shrink-0 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                  <div className={`flex items-center space-x-2 overflow-hidden transition-opacity duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100'}`}>
@@ -97,14 +97,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
                 <div className={`flex items-center space-x-2 ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
                     <button
                         onClick={toggleTheme}
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
                         aria-label="Toggle theme"
                     >
                         {theme === 'dark' ? <SunIcon className="w-6 h-6"/> : <MoonIcon className="w-6 h-6"/>}
                     </button>
                     <button
                         onClick={onLogout}
-                        className={`flex items-center space-x-2 text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold h-10 rounded-md transition-all duration-200 overflow-hidden ${isCollapsed ? 'w-10 px-2.5' : 'w-auto px-3'}`}
+                        className={`flex items-center space-x-2 text-sm bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold h-10 rounded-md transition-all duration-200 overflow-hidden ${isCollapsed ? 'w-10 px-2.5' : 'w-auto px-3'}`}
                         aria-label="Logout"
                     >
                         <ArrowRightOnRectangleIcon className="w-5 h-5 flex-shrink-0" />

@@ -323,7 +323,7 @@ const Simulator: React.FC<SimulatorProps> = ({ config2D, config3D, onSimulationC
     return (
         <div className="space-y-8">
             {/* Benchmark Workload Section */}
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center space-x-3 mb-4">
                     <div className="bg-cyan-500/10 p-2 rounded-md"><CodeBracketIcon className="w-6 h-6 text-cyan-500" /></div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Benchmark Workload</h3>
@@ -338,89 +338,95 @@ const Simulator: React.FC<SimulatorProps> = ({ config2D, config3D, onSimulationC
                             id="benchmark-select"
                             value={selectedBenchmark}
                             onChange={e => handleBenchmarkLoad(e.target.value)}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-slate-800/70 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md text-slate-900 dark:text-slate-200"
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-slate-700/50 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-lg"
                         >
-                            {Object.entries(BENCHMARK_EXAMPLES).map(([category, benchmarks]) => (
-                                <optgroup key={category} label={category}>
-                                    {Object.entries(benchmarks).map(([key, { name }]) => (
-                                        <option key={`${category}:${key}`} value={`${category}:${key}`}>{name}</option>
+                           {Object.entries(BENCHMARK_EXAMPLES).map(([category, benchmarks]) => (
+                                <optgroup label={category} key={category}>
+                                    {Object.keys(benchmarks).map((key) => (
+                                        <option value={`${category}:${key}`} key={`${category}:${key}`}>
+                                            {benchmarks[key].name}
+                                        </option>
                                     ))}
                                 </optgroup>
                             ))}
                         </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                            Memory Access Pattern
-                        </label>
-                         <div className="mt-1 grid grid-cols-3 gap-1 rounded-lg bg-slate-200 dark:bg-slate-900/50 p-1">
-                            {(['sequential', 'random', 'strided'] as MemoryAccessPattern[]).map(pattern => (
-                                <button key={pattern} onClick={() => setMemoryPattern(pattern)} className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 capitalize ${memoryPattern === pattern ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'}`}>
-                                    {pattern}
-                                </button>
-                            ))}
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label htmlFor="memory-pattern" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Memory Access Pattern</label>
+                                <select 
+                                    id="memory-pattern"
+                                    value={memoryPattern} 
+                                    onChange={(e) => setMemoryPattern(e.target.value as MemoryAccessPattern)}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-slate-700/50 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-lg"
+                                >
+                                    <option value="random">Random</option>
+                                    <option value="sequential">Sequential</option>
+                                    <option value="strided">Strided</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="instruction-mix" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    Instruction Mix (% Memory Ops): {instructionMix}%
+                                </label>
+                                <input
+                                    id="instruction-mix"
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={instructionMix}
+                                    onChange={(e) => setInstructionMix(Number(e.target.value))}
+                                    className="mt-1 w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="code-editor" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            RISC-V Assembly Code
+                        </label>
+                        <CodeEditor 
+                            id="code-editor"
+                            value={code} 
+                            onChange={e => setCode(e.target.value)}
+                            rows={15}
+                            placeholder="Enter your RISC-V code here..."
+                        />
                     </div>
                 </div>
 
-                <div className="mt-4">
-                    <label htmlFor="instruction-mix" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                        <span className="flex items-center">
-                            Instruction Mix (% Memory Ops): <strong className="ml-2 text-slate-800 dark:text-slate-100">{instructionMix}%</strong>
-                             <div className="relative group ml-1.5 flex items-center">
-                                <InformationCircleIcon className="w-4 h-4 text-slate-500" />
-                                <div className="absolute bottom-full mb-2 w-64 p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 -translate-x-1/2 left-1/2">
-                                    Adjusts the ratio of memory-access instructions (lw, sw) to computational instructions to simulate different workload types (e.g., memory-bound vs. compute-bound).
-                                </div>
-                            </div>
-                        </span>
-                    </label>
-                    <input
-                        id="instruction-mix"
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value={instructionMix}
-                        onChange={e => setInstructionMix(Number(e.target.value))}
-                        className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1"
-                    />
-                </div>
-                
-                <div className="mt-4">
-                     <label htmlFor="code-editor" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Or write your own RISC-V code:
-                    </label>
-                    <CodeEditor id="code-editor" value={code} onChange={e => setCode(e.target.value)} rows={10} placeholder="Enter RISC-V assembly code here..." />
-                </div>
-                 <div className="mt-6 flex justify-end">
-                    <button onClick={handleRunSimulation} disabled={isLoading} className="flex items-center space-x-2 text-sm bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-md transition-all duration-200 disabled:bg-slate-500 disabled:cursor-wait">
-                        <PlayIcon className="w-4 h-4" />
-                        <span>{isLoading ? 'Simulating...' : 'Run Simulation'}</span>
+                <div className="flex justify-end mt-6">
+                    <button 
+                        onClick={handleRunSimulation} 
+                        disabled={isLoading} 
+                        className="flex items-center justify-center space-x-2 text-sm bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2.5 px-6 rounded-md transition-all duration-200 disabled:bg-slate-400 dark:disabled:bg-slate-500"
+                    >
+                        <PlayIcon className="w-5 h-5"/>
+                        <span>{isLoading ? 'Simulating...' : 'Run Benchmark'}</span>
                     </button>
                 </div>
             </div>
 
-            <SystemVisualizer results={null} isVisualizing={isLoading} theme={theme} />
-
-            {/* Simulation Log Section */}
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Simulation Log</h3>
-                <div className="h-48 overflow-y-auto bg-slate-100 dark:bg-slate-900/50 p-3 rounded-md font-mono text-xs space-y-2 border border-slate-200 dark:border-slate-700">
-                   {logs.map((log, i) => {
-                        let Icon = InformationCircleIcon;
-                        let iconColor = 'text-slate-500';
-                        if(log.type === 'success') { Icon = CheckCircleIcon; iconColor = 'text-green-500'; }
-                        if(log.type === 'error') { Icon = ExclamationTriangleIcon; iconColor = 'text-red-500'; }
-                        if(log.type === 'special') { Icon = PlayIcon; iconColor = 'text-cyan-500'; }
-
-                        return (
-                             <div key={i} className={`flex items-start space-x-2`}>
-                                <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${iconColor}`} />
-                                <span className="text-slate-700 dark:text-slate-300">{log.message}</span>
+            {/* Simulation Visualizer & Log Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SystemVisualizer results={null} isVisualizing={isLoading} theme={theme} />
+                
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Simulation Log</h3>
+                    <div className="flex-1 h-96 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto font-mono text-xs space-y-2">
+                        {logs.map((log, i) => (
+                            <div key={i} className={`flex items-start ${
+                                log.type === 'error' ? 'text-red-500 dark:text-red-400' : 
+                                log.type === 'success' ? 'text-green-500 dark:text-green-400' :
+                                log.type === 'warning' ? 'text-amber-500 dark:text-amber-400' :
+                                log.type === 'special' ? 'text-cyan-500 dark:text-cyan-400' :
+                                'text-slate-600 dark:text-slate-300'
+                            }`}>
+                                <span className="w-24 shrink-0 opacity-75">[{new Date().toLocaleTimeString()}]</span>
+                                <p className="flex-1 break-words">{log.message}</p>
                             </div>
-                        )
-                   })}
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

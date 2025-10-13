@@ -223,7 +223,7 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
 
     return (
         <div className="space-y-8">
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Architectural Parameters</h3>
@@ -234,7 +234,7 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                             <button
                                 ref={loadButtonRef}
                                 onClick={() => setShowLoadMenu(prev => !prev)}
-                                className="flex items-center space-x-2 text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200"
+                                className="flex items-center space-x-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200"
                             >
                                 <ArrowUpTrayIcon className="w-4 h-4" />
                                 <span>Load</span>
@@ -264,11 +264,11 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                                 </div>
                             )}
                         </div>
-                        <button onClick={() => setShowSaveModal(true)} className="flex items-center space-x-2 text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200">
+                        <button onClick={() => setShowSaveModal(true)} className="flex items-center space-x-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200">
                             <ArrowDownTrayIcon className="w-4 h-4" />
                             <span>Save</span>
                         </button>
-                        <button onClick={handleReset} className="flex items-center space-x-2 text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200">
+                        <button onClick={handleReset} className="flex items-center space-x-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-1.5 px-3 rounded-md transition-all duration-200">
                             <ArrowUturnLeftIcon className="w-4 h-4" />
                             <span>Reset All</span>
                         </button>
@@ -279,7 +279,7 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                     {([['2D', config2D], ['3D', config3D]] as const).map(([type, config]) => (
                         <div key={type} className="space-y-6">
                             <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-3 text-lg">{type} {type === '2D' ? 'Baseline' : 'Stacked'} System</h4>
-                            <div className="space-y-4 p-4 bg-slate-100 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <h5 className="font-bold text-sm text-slate-600 dark:text-slate-300">Main Memory</h5>
                                 <SliderParameterInput
                                     label="Latency"
@@ -299,14 +299,14 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                             </div>
                             
                             {type === '3D' && (
-                                <div className="space-y-4 p-4 bg-slate-100 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                     <h5 className="font-bold text-sm text-slate-600 dark:text-slate-300">Through-Silicon Via (TSV)</h5>
                                     <ParameterInput label="TSV Latency" unit="Cycles" value={config.tsv.latency} onChange={e => handleConfigChange(type, 'tsv', 'latency', e.target.value)} />
                                     <ParameterInput label="Power per Bit" unit="fJ" value={config.tsv.powerPerBit} onChange={e => handleConfigChange(type, 'tsv', 'powerPerBit', e.target.value)} />
                                 </div>
                             )}
 
-                             <div className="space-y-4 p-4 bg-slate-100 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                             <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <h5 className="font-bold text-sm text-slate-600 dark:text-slate-300">Thermal Properties</h5>
                                 <ParameterInput label="Logic Die TDP" unit="Watts" value={config.thermal.tdpLogicDie} onChange={e => handleConfigChange(type, 'thermal', 'tdpLogicDie', e.target.value)} />
                                 {type === '3D' && <ParameterInput label="Memory Die TDP" unit="Watts" value={config.thermal.tdpMemoryDie} onChange={e => handleConfigChange(type, 'thermal', 'tdpMemoryDie', e.target.value)} />}
@@ -318,7 +318,7 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                 </div>
             </div>
 
-             <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                  <div className="flex items-center justify-between mb-6">
                      <div className="flex items-center space-x-3">
                         <div className="bg-cyan-500/10 p-2 rounded-md"><TableCellsIcon className="w-6 h-6 text-cyan-500" /></div>
@@ -337,7 +337,7 @@ const Configurator: React.FC<ConfiguratorProps> = ({ config2D, setConfig2D, conf
                         <div key={type} className="space-y-4">
                             <h4 className="font-semibold text-slate-800 dark:text-slate-200 text-lg">{type} {type === '2D' ? 'Baseline' : 'Stacked'}</h4>
                             {(['l1', 'l2', 'l3'] as const).map(level => (
-                                <details key={level} className="bg-slate-100 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700" open>
+                                <details key={level} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700" open>
                                     <summary className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer flex justify-between items-center">
                                         <div className="flex items-center space-x-3">
                                             <input type="checkbox" checked={config.cache[level].enabled} onChange={(e) => handleCacheToggle(type, level, e.target.checked)} className="rounded border-slate-400 text-cyan-600 shadow-sm focus:border-cyan-300 focus:ring focus:ring-offset-0 focus:ring-cyan-200 focus:ring-opacity-50" onClick={e => e.stopPropagation()} />

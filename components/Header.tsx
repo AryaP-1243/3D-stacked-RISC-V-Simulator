@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ activePage, currentUser }) => {
     const userInitial = currentUser ? currentUser.charAt(0).toUpperCase() : '?';
 
     return (
-        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+        <header className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 shadow-sm">
             <div className="mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-4">
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ activePage, currentUser }) => {
                             <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
                                 {currentUser}
                             </span>
-                            <div className="w-9 h-9 rounded-full bg-cyan-600 flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-sky-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
                                 {userInitial}
                             </div>
                         </div>

@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Configurator from './pages/Configurator';
-import Simulator from './pages/Simulator';
+// FIX: Renamed the imported 'Simulator' component to 'CpuSimulator' to avoid potential naming conflicts.
+import CpuSimulator from './pages/Simulator';
 import Analysis from './pages/Analysis';
 import AIAssistant from './pages/AIAssistant';
 import GpuSimulator from './pages/GpuSimulator';
@@ -135,7 +137,7 @@ const App: React.FC = () => {
             defaultConfig2D={DEFAULT_CONFIG_2D}
             defaultConfig3D={DEFAULT_CONFIG_3D}
         />;
-        case 'simulator': return <Simulator 
+        case 'simulator': return <CpuSimulator 
             config2D={config2D} 
             config3D={config3D} 
             onSimulationComplete={handleCpuSimulationComplete}
@@ -178,7 +180,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`flex min-h-screen font-sans transition-colors duration-300 bg-slate-100 dark:bg-slate-950 ${theme}`}>
+    <div className={`flex min-h-screen font-sans transition-colors duration-300 bg-slate-50 dark:bg-slate-900 ${theme}`}>
       <Sidebar 
         activePage={activePage}
         setActivePage={setActivePage}
