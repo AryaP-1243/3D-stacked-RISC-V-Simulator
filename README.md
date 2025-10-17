@@ -10,7 +10,7 @@
 
 *Design, simulate, and analyze modern processor architectures with AI-powered insights*
 
-[View Demo](https://ai.studio/apps/drive/1P62K3Z_QuTCY0-t84fXgvaLwv9AjzSsT](https://service-3d-stacked-risc-v-accelerator-simulator-510594466659.us-west1.run.app/) • [Report Bug](#) • [Request Feature](#)
+[View Demo](https://service-3d-stacked-risc-v-accelerator-simulator-510594466659.us-west1.run.app/) • [Report Bug](#) • [Request Feature](#)
 
 </div>
 
@@ -270,6 +270,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [3D IC Technology Overview](https://en.wikipedia.org/wiki/Three-dimensional_integrated_circuit)
 - [Thermal Design Power (TDP) Explained](https://en.wikipedia.org/wiki/Thermal_design_power)
 
+---
+
+## 📞 Support
+
+- **View in AI Studio**: [Launch Application](https://ai.studio/apps/drive/1P62K3Z_QuTCY0-t84fXgvaLwv9AjzSsT)
+- **Issues**: [GitHub Issues](#) (replace with actual link)
+- **Documentation**: See [Wiki](#) for detailed guides
 
 ---
 
