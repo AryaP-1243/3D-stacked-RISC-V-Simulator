@@ -10,7 +10,7 @@
 
 *Design, simulate, and analyze modern processor architectures with AI-powered insights*
 
-[View Demo](https://ai.studio/apps/drive/1P62K3Z_QuTCY0-t84fXgvaLwv9AjzSsT) • [Report Bug](#) • [Request Feature](#)
+[View Demo](https://ai.studio/apps/drive/1P62K3Z_QuTCY0-t84fXgvaLwv9AjzSsT](https://service-3d-stacked-risc-v-accelerator-simulator-510594466659.us-west1.run.app/) • [Report Bug](#) • [Request Feature](#)
 
 </div>
 
